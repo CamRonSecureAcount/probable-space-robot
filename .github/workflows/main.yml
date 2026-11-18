@@ -9,7 +9,7 @@ permissions:
 jobs:
   start-vm:
     runs-on: ubuntu-latest
-    timeout-minutes: 360
+    timeout-minutes: 420
 
     steps:
       - name: Check out repository
@@ -35,6 +35,16 @@ jobs:
           done
           echo "noVNC did not become ready." >&2
           exit 1
+
+      - name: Output noVNC port
+        id: novnc
+        run: |
+          echo "port=6080" >> "$GITHUB_OUTPUT"
+          echo "noVNC port: 6080"
+          echo "Runner-local URL: http://127.0.0.1:6080/vnc.html?autoconnect=true"
+
+      - name: Keep the VM running for one hour
+        run: sleep 3600
 
       - name: Show logs on failure
         if: failure()
