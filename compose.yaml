@@ -1,0 +1,17 @@
+services:
+  mint:
+    build: .
+    ports:
+      - "${NOVNC_PORT:-6080}:6080"
+    devices:
+      - /dev/kvm:/dev/kvm
+    environment:
+      MEMORY_MB: "${MEMORY_MB:-5000}"
+      CPUS: "${CPUS:-4}"
+      DISK_SIZE: "${DISK_SIZE:-64G}"
+    volumes:
+      - mint-data:/data
+    restart: unless-stopped
+
+volumes:
+  mint-data:
