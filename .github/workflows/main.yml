@@ -1,0 +1,45 @@
+name: Start Linux Mint VM
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  start-vm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Start Linux Mint and noVNC
+        env:
+          MEMORY_MB: "4096"
+          CPUS: "2"
+          DISK_SIZE: "64G"
+        run: docker compose up --build --detach
+
+      - name: Wait for noVNC
+        run: |
+          for attempt in {1..240}; do
+            if curl --fail --silent \
+              http://127.0.0.1:6080/vnc.html \
+              --output /dev/null; then
+              echo "noVNC is responding."
+              exit 0
+            fi
+            sleep 15
+          done
+          echo "noVNC did not become ready." >&2
+          exit 1
+
+      - name: Show logs on failure
+        if: failure()
+        run: docker compose logs --no-color
+
+      - name: Clean up
+        if: always()
+        run: docker compose down --volumes --remove-orphans
